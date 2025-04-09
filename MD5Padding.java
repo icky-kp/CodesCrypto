@@ -1,14 +1,14 @@
 import java.util.Scanner;
 
-public class SHA512 {
+public class MD5Padding {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Example 1:");
-        calculatePadding(700);
+        calculatePadding(400);
 
         System.out.println("\nExample 2:");
-        System.out.print("Enter message length in bits (greater than 5000): ");
+        System.out.print("Enter message length in bits (greater than 500): ");
         long messageBits = scanner.nextLong();
         calculatePadding(messageBits);
 
@@ -22,19 +22,19 @@ public class SHA512 {
         long afterOneBit = messageLengthBits + 1;
 
         // Calculate padding zeros
-        long paddingZeros = 896 - (afterOneBit % 1024);
+        long paddingZeros = 448 - (afterOneBit % 512);
         if (paddingZeros < 0) {
-            paddingZeros += 1024;
+            paddingZeros += 512;
         }
 
-        // Calculate total padded length (original + 1 + zeros + 128 for length field)
-        long paddedLength = messageLengthBits + 1 + paddingZeros + 128;
+        // Calculate total padded length (original + 1 + zeros + 64 for length field)
+        long paddedLength = messageLengthBits + 1 + paddingZeros + 64;
 
         // Calculate number of blocks
-        long blocks = paddedLength / 1024;
+        long blocks = paddedLength / 512;
 
-        System.out.println("Padding bits: 1 bit + " + paddingZeros + " zero bits + 128 bits for length");
-        System.out.println("Total padding bits: " + (1 + paddingZeros + 128) + " bits");
+        System.out.println("Padding bits: 1 bit + " + paddingZeros + " zero bits + 64 bits for length");
+        System.out.println("Total padding bits: " + (1 + paddingZeros + 64) + " bits");
         System.out.println("Padded message length: " + paddedLength + " bits");
         System.out.println("Number of blocks required: " + blocks);
     }

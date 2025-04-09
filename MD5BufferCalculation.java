@@ -4,19 +4,20 @@ public class MD5BufferCalculation {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        // Get initial buffer values
-        System.out.println("Enter initial MD buffer values (hexadecimal):");
-        System.out.print("A: 0x");
-        int A = Integer.parseUnsignedInt(scanner.nextLine(), 16);
-        System.out.print("B: 0x");
-        int B = Integer.parseUnsignedInt(scanner.nextLine(), 16);
-        System.out.print("C: 0x");
-        int C = Integer.parseUnsignedInt(scanner.nextLine(), 16);
-        System.out.print("D: 0x");
-        int D = Integer.parseUnsignedInt(scanner.nextLine(), 16);
+        // Predefined initial MD buffer values (hexadecimal)
+        int A = 0x67452301;
+        int B = 0xEFCDAB89;
+        int C = 0x98BADCFE;
+        int D = 0x10325476;
+
+        System.out.println("Predefined MD buffer values:");
+        System.out.println("A: 0x" + Integer.toHexString(A).toUpperCase());
+        System.out.println("B: 0x" + Integer.toHexString(B).toUpperCase());
+        System.out.println("C: 0x" + Integer.toHexString(C).toUpperCase());
+        System.out.println("D: 0x" + Integer.toHexString(D).toUpperCase());
 
         // Get message blocks and constants
-        System.out.print("Enter M0 (hexadecimal): 0x");
+        System.out.print("\nEnter M0 (hexadecimal): 0x");
         int M0 = Integer.parseUnsignedInt(scanner.nextLine(), 16);
         System.out.print("Enter K1 (hexadecimal): 0x");
         int K1 = Integer.parseUnsignedInt(scanner.nextLine(), 16);

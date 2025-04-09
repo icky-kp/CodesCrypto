@@ -1,6 +1,4 @@
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
 
 public class DSS {
@@ -10,80 +8,72 @@ public class DSS {
         System.out.println("Enter DSA parameters:");
 
         System.out.print("Enter prime number p: ");
-        BigInteger p = new BigInteger(scanner.nextLine());
+        BigInteger primeP = new BigInteger(scanner.nextLine());
 
         System.out.print("Enter prime number q (divisor of p-1): ");
-        BigInteger q = new BigInteger(scanner.nextLine());
+        BigInteger primeQ = new BigInteger(scanner.nextLine());
 
         System.out.print("Enter h (1 < h < p-1): ");
-        BigInteger h = new BigInteger(scanner.nextLine());
+        BigInteger baseH = new BigInteger(scanner.nextLine());
 
         System.out.print("Enter original message: ");
         String message = scanner.nextLine();
 
         System.out.print("Enter private key x (x < q): ");
-        BigInteger x = new BigInteger(scanner.nextLine());
+        BigInteger privateKeyX = new BigInteger(scanner.nextLine());
 
         System.out.print("Enter random integer k (k < q): ");
-        BigInteger k = new BigInteger(scanner.nextLine());
+        BigInteger randomK = new BigInteger(scanner.nextLine());
 
-        // Calculate g = h^((p-1)/q) mod p
-        BigInteger g = h.modPow(p.subtract(BigInteger.ONE).divide(q), p);
+        // Calculate r = h^((p-1)/q) mod p
+        BigInteger r = baseH.modPow(primeP.subtract(BigInteger.ONE).divide(primeQ), primeP);
 
-        // Calculate public key y = g^x mod p
-        BigInteger y = g.modPow(x, p);
+        // Calculate public key y = r^x mod p
+        BigInteger publicKeyY = r.modPow(privateKeyX, primeP);
 
-        // Hash the message
-        BigInteger H;
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-1");
-            byte[] messageDigest = md.digest(message.getBytes());
-            H = new BigInteger(1, messageDigest).mod(q);
-        } catch (NoSuchAlgorithmException e) {
-            // For simplicity, if SHA-1 is not available, use a simple hash
-            H = new BigInteger(message.getBytes()).mod(q);
-        }
+        // Use the plaintext message directly as w (hash of the message)
+        BigInteger hashW = new BigInteger(message.getBytes()).mod(primeQ);
 
         // Signature Generation (Sender side)
-        // Calculate r = (g^k mod p) mod q
-        BigInteger r = g.modPow(k, p).mod(q);
+        // Calculate a = (r^k mod p) mod q
+        BigInteger signatureA = r.modPow(randomK, primeP).mod(primeQ);
 
         // Calculate k^-1 mod q
-        BigInteger kInverse = k.modInverse(q);
+        BigInteger kInverse = randomK.modInverse(primeQ);
 
-        // Calculate s = (k^-1 * (H + x*r)) mod q
-        BigInteger s = kInverse.multiply(H.add(x.multiply(r))).mod(q);
+        // Calculate b = (k^-1 * (w + x*a)) mod q
+        BigInteger signatureB = kInverse.multiply(hashW.add(privateKeyX.multiply(signatureA))).mod(primeQ);
 
         // Signature Verification (Receiver side)
-        // Calculate w = s^-1 mod q
-        BigInteger w = s.modInverse(q);
+        // Calculate z = b^-1 mod q
+        BigInteger z = signatureB.modInverse(primeQ);
 
-        // Calculate u1 = (H * w) mod q
-        BigInteger u1 = H.multiply(w).mod(q);
+        // Calculate u1 = (w * z) mod q
+        BigInteger u1 = hashW.multiply(z).mod(primeQ);
 
-        // Calculate u2 = (r * w) mod q
-        BigInteger u2 = r.multiply(w).mod(q);
+        // Calculate u2 = (a * z) mod q
+        BigInteger u2 = signatureA.multiply(z).mod(primeQ);
 
-        // Calculate v = ((g^u1 * y^u2) mod p) mod q
-        BigInteger v = g.modPow(u1, p).multiply(y.modPow(u2, p)).mod(p).mod(q);
+        // Calculate v = ((r^u1 * y^u2) mod p) mod q
+        BigInteger verificationV = r.modPow(u1, primeP).multiply(publicKeyY.modPow(u2, primeP)).mod(primeP).mod(primeQ);
 
         // Output results
         System.out.println("\n----- Sender Side -----");
-        System.out.println("g = " + g);
-        System.out.println("Public key (y) = " + y);
         System.out.println("r = " + r);
-        System.out.println("s = " + s);
+        System.out.println("Public key (y) = " + publicKeyY);
+        System.out.println("a = " + signatureA);
+        System.out.println("b = " + signatureB);
 
         System.out.println("\n----- Receiver Side -----");
-        System.out.println("w = " + w);
+        System.out.println("z = " + z);
         System.out.println("u1 = " + u1);
         System.out.println("u2 = " + u2);
-        System.out.println("v = " + v);
+        System.out.println("v = " + verificationV);
 
         System.out.println("\n----- Verification -----");
-        System.out.println("v = " + v);
-        System.out.println("r = " + r);
-        System.out.println("Signature is " + (v.equals(r) ? "valid" : "invalid"));
+        System.out.println("v = " + verificationV);
+        System.out.println("a = " + signatureA);
+        System.out.println("Signature is " + (verificationV.equals(signatureA) ? "valid" : "invalid"));
 
         scanner.close();
     }
